@@ -16,19 +16,19 @@ namespace swzwij.HealthData
         /// The current health of the entity.
         /// </summary>
         [SerializeField]
-        private float health = 100f;
+        private float _health = 100f;
 
         /// <summary>
         /// Determines if the entity can over-heal beyond its maximum health.
         /// </summary>
         [SerializeField]
-        private bool canOverHeal;
+        private bool _canOverHeal;
 
         /// <summary>
         /// The duration of invincibility after taking damage in seconds.
         /// </summary>
         [SerializeField]
-        private float invincibilityTime = 0.1f;
+        private float _invincibilityTime = 0.1f;
 
         /// <summary>
         /// The maximum health of the entity.
@@ -47,12 +47,13 @@ namespace swzwij.HealthData
 
         #endregion
 
+
         #region Public Getters
 
         /// <summary>
         /// The current health of the entity.
         /// </summary>
-        public float Health => health;
+        public float Health => _health;
 
         /// <summary>
         /// The maximum health of the entity.
@@ -62,7 +63,7 @@ namespace swzwij.HealthData
         /// <summary>
         /// Indicates whether the entity has reached its maximum health.
         /// </summary>
-        public bool HasMaxHealth => health >= _maxHealth;
+        public bool HasMaxHealth => _health >= _maxHealth;
 
         /// <summary>
         /// Indicates whether the entity is dead.
@@ -75,6 +76,7 @@ namespace swzwij.HealthData
         public bool IsHit => _isHit;
 
         #endregion
+
 
         #region Public Events
 
@@ -107,6 +109,7 @@ namespace swzwij.HealthData
 
         #endregion
 
+
         #region Public Functions
 
         /// <summary>
@@ -116,14 +119,15 @@ namespace swzwij.HealthData
         /// <param name="healthAmount">The amount of health to add to the entity.</param>
         public void AddHealth(float healthAmount)
         {
-            if (_isDead) return;
-            if (!canOverHeal && HasMaxHealth) return;
+            if (_isDead || (!_canOverHeal && HasMaxHealth))
+                return;
 
-            health += healthAmount;
+            _health += healthAmount;
 
-            if (health > _maxHealth && !canOverHeal) health = _maxHealth;
+            if (_health > _maxHealth && !_canOverHeal)
+                _health = _maxHealth;
 
-            OnHealthChanged?.Invoke(health);
+            OnHealthChanged?.Invoke(_health);
             OnHealthAdded?.Invoke(healthAmount);
         }
 
@@ -133,16 +137,17 @@ namespace swzwij.HealthData
         /// <param name="damageAmount">The amount of damage to inflict on the entity.</param>
         public void TakeDamage(float damageAmount)
         {
-            if (_isDead || _isHit) return;
+            if (_isDead || _isHit)
+                return;
 
             StartCoroutine(ActivateInvincibility());
 
-            health -= damageAmount;
+            _health -= damageAmount;
 
-            OnHealthChanged?.Invoke(health);
+            OnHealthChanged?.Invoke(_health);
             OnDamageTaken?.Invoke(damageAmount);
 
-            if (health <= 0) Die();
+            if (_health <= 0) Die();
         }
 
         /// <summary>
@@ -155,7 +160,7 @@ namespace swzwij.HealthData
 
             AddHealth(newHealth);
 
-            OnHealthChanged?.Invoke(health);
+            OnHealthChanged?.Invoke(_health);
             OnResurrected?.Invoke();
         }
 
@@ -171,6 +176,7 @@ namespace swzwij.HealthData
 
         #endregion
 
+
         #region Private Functions
 
         /// <summary>
@@ -181,7 +187,7 @@ namespace swzwij.HealthData
         /// <summary>
         /// Initializes the entity's maximum health value.
         /// </summary>
-        private void InitializeHealth() => _maxHealth = health;
+        private void InitializeHealth() => _maxHealth = _health;
 
         /// <summary>
         /// Activates invincibility for a brief period after being hit.
@@ -189,7 +195,7 @@ namespace swzwij.HealthData
         private IEnumerator ActivateInvincibility()
         {
             _isHit = true;
-            yield return new WaitForSeconds(invincibilityTime);
+            yield return new WaitForSeconds(_invincibilityTime);
             _isHit = false;
         }
 
@@ -198,7 +204,7 @@ namespace swzwij.HealthData
         /// </summary>
         private void Die()
         {
-            health = 0;
+            _health = 0;
             _isDead = true;
 
             OnHealthChanged?.Invoke(Health);
