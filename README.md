@@ -8,8 +8,6 @@ Welcome to the Unity Tool Armory, a curated collection of powerful and versatile
 
 - **[Sheets - Spreadsheet Reader](https://github.com/swzwij/Unity-Tool-Armory/wiki/Sheets-%E2%80%90-Spreadsheet-Reader):** Simplify data management by seamlessly integrating spreadsheet reading capabilities into your Unity project. Load and parse spreadsheet data with ease.
 
-- **[Another Tool]:** Brief description of another tool available in the armory.
-
 ## How to Use
 
 Explore each tool's individual wiki page to find detailed documentation, usage instructions, and examples. The Unity Tool Armory is designed to be modular, allowing you to integrate only the tools you need for your specific project requirements.
