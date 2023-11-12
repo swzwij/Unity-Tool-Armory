@@ -10,6 +10,8 @@ Welcome to the Unity Tool Armory, a curated collection of powerful and versatile
 
 - **[HealthData - Unity Health Management System](https://github.com/swzwij/Unity-Tool-Armory/wiki/Health-Data):** Efficiently manage health-related data for game characters or entities in Unity. Track health, handle damage, and manage related events with ease. Promotes clean and organized code structure.
 
+- **[API Manager](https://github.com/swzwij/Unity-Tool-Armory/wiki/API-Manager):** Streamline API request handling in Unity with the APIManager class. Manage API requests and responses effortlessly, following the Singleton pattern for organization and providing callbacks for successful responses and error handling.
+
 ## How to Use
 
 Explore each tool's individual wiki page to find detailed documentation, usage instructions, and examples. The Unity Tool Armory is designed to be modular, allowing you to integrate only the tools you need for your specific project requirements.
