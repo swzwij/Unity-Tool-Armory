@@ -12,6 +12,8 @@ Welcome to the Unity Tool Armory, a curated collection of powerful and versatile
 
 - **[API Manager](https://github.com/swzwij/Unity-Tool-Armory/wiki/API-Manager):** Streamline API request handling in Unity with the APIManager class. Manage API requests and responses effortlessly, following the Singleton pattern for organization and providing callbacks for successful responses and error handling.
 
+- **[Extensions](https://github.com/swzwij/Unity-Tool-Armory/wiki/Extensions):** A curated collection of extensions aimed at streamlining and augmenting the game development process within the Unity engine.
+
 ## How to Use
 
 Explore each tool's individual wiki page to find detailed documentation, usage instructions, and examples. The Unity Tool Armory is designed to be modular, allowing you to integrate only the tools you need for your specific project requirements.
