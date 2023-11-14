@@ -38,4 +38,21 @@ public static class VectorExtensions
     /// <returns>A new Vector3 with the Z axis set to the specified value and the X and Y axes unchanged.</returns>
     public static Vector3 SetZ(this Vector3 a, float z) => new(a.x, a.y, z);
 
+    /// <summary>
+    /// Sets the X axis of a Vector2 to the specified value.
+    /// </summary>
+    /// <param name="a">The original Vector2.</param>
+    /// <param name="x">The new value for the X axis.</param>
+    /// <returns>A new Vector2 with the X axis set to the specified value and the Y axis unchanged.</returns>
+    public static Vector2 SetX(this Vector2 a, float x) => new(x, a.y);
+
+    /// <summary>
+    /// Sets the Y axis of a Vector2 to the specified value.
+    /// </summary>
+    /// <param name="a">The original Vector2.</param>
+    /// <param name="y">The new value for the Y axis.</param>
+    /// <returns>A new Vector2 with the Y axis set to the specified value and the X axis unchanged.</returns>
+    public static Vector2 SetY(this Vector2 a, float y) => new(a.x, y);
+
+
 }
