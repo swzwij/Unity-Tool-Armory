@@ -53,6 +53,4 @@ public static class VectorExtensions
     /// <param name="y">The new value for the Y axis.</param>
     /// <returns>A new Vector2 with the Y axis set to the specified value and the X axis unchanged.</returns>
     public static Vector2 SetY(this Vector2 a, float y) => new(a.x, y);
-
-
 }
