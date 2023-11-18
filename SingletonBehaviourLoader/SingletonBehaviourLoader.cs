@@ -5,54 +5,89 @@ using UnityEngine.SceneManagement;
 
 namespace swzwij.Singletons
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class SingletonBehaviourLoader
     {
-        private static string _singletonPrefabFolder = "Singletons";
+        private const string SINGLETON_PREFAB_FOLDER = "Singletons";
 
+        /// <summary>
+        /// The general singelton parent object.
+        /// </summary>
         private static GameObject _singletonParentObject;
 
-        private static SingletonLoadData _singletonLoadData;
+        /// <summary>
+        /// Whether the general singeltons have been initialized.
+        /// </summary>
+        private static bool _hasInitializedSingletons;
 
-        private static bool _hasInitialized;
+        /// <summary>
+        /// All the general singletons which go into the dontdestroyonload.
+        /// </summary>
+        private static readonly List<GameObject> _generalSingletons = new();
 
-        private static Dictionary<GameObject, SingletonLoadData.LoadData> _loadDatas = new();
+        /// <summary>
+        /// All the scene specific singletons.
+        /// </summary>
+        private static readonly Dictionary<string, List<GameObject>> _sceneSingletons = new();
 
-        public static string SingletonPrefabFolder
-        {
-            get => _singletonPrefabFolder;
-            set => _singletonPrefabFolder = value;
-        }
-
+        /// <summary>
+        /// Initialize all the sinletons and there data on subsystem registration.
+        /// </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Initialize()
         {
-            SceneManager.sceneLoaded += OnSceneLoad;
+            SceneManager.sceneLoaded += OnSceneLoaded;
             InitializeLoadData();
         }
 
-        private static void OnSceneLoad(Scene scene, LoadSceneMode mode)
+        /// <summary>
+        /// load scene specific singletons on scene load and initialize general singletons if not done alreadty.
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <param name="mode"></param>
+        private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            Debug.Log($"{scene.name} Loaded");
-            LoadSingletons(scene);
-            _hasInitialized = true;
-        }
-
-        private static void LoadSingletons(Scene scene)
-        {
-            if(!_hasInitialized)
+            if(!_hasInitializedSingletons)
+            {
                 _singletonParentObject = InstantiateSingletonParent();
+                LoadGeneralSingletons();
+                _hasInitializedSingletons = true;
+            }
 
-            GameObject[] singletons = RetrieveSingletonsFromFolder(_singletonPrefabFolder);
-
-            foreach (GameObject singleton in singletons)
-                InstantiateSingleton(singleton, scene);
+            LoadSceneSingletons(scene);
         }
 
+        /// <summary>
+        /// load all the general singletons.
+        /// </summary>
+        private static void LoadGeneralSingletons()
+        {
+            foreach (GameObject singleton in _generalSingletons)
+                CreateSingletonInstance(singleton, true);
+        }
+
+        /// <summary>
+        /// load scene specific sinegelons.
+        /// </summary>
+        /// <param name="scene"></param>
+        private static void LoadSceneSingletons(Scene scene)
+        {
+            if (!_sceneSingletons.ContainsKey(scene.name))
+                return;
+
+            foreach (GameObject singleton in _sceneSingletons[scene.name])
+                CreateSingletonInstance(singleton, false);
+        }
+
+        /// <summary>
+        /// instantie singleton parent.
+        /// </summary>
+        /// <returns></returns>
         private static GameObject InstantiateSingletonParent()
         {
             const string SINGLETON_PARENT_NAME = "Singleton Instances";
-
-            Debug.Log("Created parent");
 
             GameObject singletonParent = Object.Instantiate(new GameObject(SINGLETON_PARENT_NAME));
             singletonParent.name = SINGLETON_PARENT_NAME;
@@ -61,42 +96,56 @@ namespace swzwij.Singletons
             return singletonParent;
         }
 
-        private static void InstantiateSingleton(GameObject singleton, Scene scene)
-        {
-            if(!_loadDatas.ContainsKey(singleton) && !_hasInitialized)
-            {
-                CreateSingletonInstance(singleton, true);
-                return;
-            }
-
-            if (!_loadDatas.ContainsKey(singleton))
-                return;
-
-            if(_loadDatas[singleton].SceneName == string.Empty && !_hasInitialized)
-            {
-                CreateSingletonInstance(singleton, true);
-                return;
-            }
-
-            if (_loadDatas[singleton].SceneName == scene.name)
-            {
-                CreateSingletonInstance(singleton, false);
-                return;
-            }
-        }
-
-        private static void CreateSingletonInstance(GameObject singleton, bool dontDetroyOnLoad)
+        /// <summary>
+        /// Create a singleton instance.
+        /// </summary>
+        /// <param name="singleton"></param>
+        /// <param name="dontDetroyOnLoad"></param>
+        /// <returns></returns>
+        private static GameObject CreateSingletonInstance(GameObject singleton, bool dontDetroyOnLoad)
         {
             GameObject singletonInstance = Object.Instantiate(singleton);
             singletonInstance.name = singleton.name;
 
             if (!dontDetroyOnLoad)
-                return;
+                return singletonInstance;
 
             Object.DontDestroyOnLoad(singletonInstance);
             singletonInstance.transform.parent = _singletonParentObject.transform;
+
+            return singletonInstance;
         }
 
+        /// <summary>
+        /// Initailzie all the singleton data from the sciprable object and the folder of prefabs.
+        /// </summary>
+        private static void InitializeLoadData()
+        {
+            SingletonLoadData _singletonLoadData = RetrieveSingletonLoadData(SINGLETON_PREFAB_FOLDER);
+            SingletonLoadData.Data[] loadData = _singletonLoadData.LoadDatas;
+            GameObject[] singletons = RetrieveSingletonsFromFolder(SINGLETON_PREFAB_FOLDER);
+
+            foreach (GameObject singleton in singletons)
+                _generalSingletons.Add(singleton);
+
+            foreach (SingletonLoadData.Data data in loadData)
+            {
+                if (string.IsNullOrEmpty(data.SceneName))
+                    continue;
+
+                if (!_sceneSingletons.ContainsKey(data.SceneName))
+                    _sceneSingletons.Add(data.SceneName, new());
+
+                _sceneSingletons[data.SceneName].Add(data.Singleton);
+                _generalSingletons.Remove(data.Singleton);
+            }
+        }
+
+        /// <summary>
+        /// get all singletons from folder.
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <returns></returns>
         private static GameObject[] RetrieveSingletonsFromFolder(string folderPath)
         {
             string[] prefabNames = GetPrefabNamesInFolder(folderPath);
@@ -109,6 +158,24 @@ namespace swzwij.Singletons
             return singletons;
         }
 
+        /// <summary>
+        /// get singleton load data sciptable object.
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <returns></returns>
+        private static SingletonLoadData RetrieveSingletonLoadData(string folderPath)
+        {
+            string[] prefabPaths = Directory.GetFiles("Assets/Resources/" + folderPath, "*.asset");
+            string prefabName = Path.GetFileNameWithoutExtension(prefabPaths[0]);
+            SingletonLoadData singletonLoadData = Resources.Load<SingletonLoadData>(folderPath + "/" + prefabName);
+            return singletonLoadData;
+        }
+
+        /// <summary>
+        /// get prefabs from a folder of the given path.
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <returns></returns>
         private static string[] GetPrefabNamesInFolder(string folderPath)
         {
             string[] prefabPaths = Directory.GetFiles("Assets/Resources/" + folderPath, "*.prefab");
@@ -122,24 +189,6 @@ namespace swzwij.Singletons
             }
 
             return prefabNames.ToArray();
-        }
-
-        private static SingletonLoadData RetrieveSingletonLoadData(string folderPath)
-        {
-            string[] prefabPaths = Directory.GetFiles("Assets/Resources/" + folderPath, "*.asset");
-            string prefabName = Path.GetFileNameWithoutExtension(prefabPaths[0]);
-            var singletonLoadData = Resources.Load<SingletonLoadData>(folderPath + "/" + prefabName);
-            return singletonLoadData;
-        }
-            
-        private static void InitializeLoadData()
-        {
-            _singletonLoadData = RetrieveSingletonLoadData(_singletonPrefabFolder);
-            Debug.Log(_singletonLoadData);
-            SingletonLoadData.LoadData[] singletonLoadDatas = _singletonLoadData.LoadDatas;
-
-            foreach (var singletonData in singletonLoadDatas)
-                _loadDatas.Add(singletonData.Singleton, singletonData);
         }
     }
 }
