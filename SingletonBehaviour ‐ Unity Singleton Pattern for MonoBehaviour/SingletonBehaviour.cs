@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace swzwij.SingletonBehaviour
+namespace swzwij.Singletons
 {
     /// <summary>
     /// A generic Unity Singleton pattern implementation for MonoBehaviour-derived classes.
