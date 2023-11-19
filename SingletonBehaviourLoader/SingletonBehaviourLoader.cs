@@ -122,7 +122,7 @@ namespace swzwij.Singletons
         private static void InitializeLoadData()
         {
             SingletonLoadData _singletonLoadData = RetrieveSingletonLoadData(SINGLETON_PREFAB_FOLDER);
-            SingletonLoadData.Data[] loadData = _singletonLoadData.LoadDatas;
+            List<SingletonLoadData.Data> loadData = _singletonLoadData.LoadDatas;
             GameObject[] singletons = RetrieveSingletonsFromFolder(SINGLETON_PREFAB_FOLDER);
 
             foreach (GameObject singleton in singletons)
